@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000"); // Connect to backend
+const socket = io("https://file-share-backend-90mg.onrender.com"); // Connect to backend
 
 const App = () => {
     const peerRef = useRef(null);
