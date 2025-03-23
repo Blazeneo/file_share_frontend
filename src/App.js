@@ -18,7 +18,16 @@ const [downloadComplete, setDownloadComplete] = useState(false);
 
     // Create Peer Connection
     const createPeerConnection = () => {
-        const peer = new RTCPeerConnection();
+        const peer = new RTCPeerConnection({
+    iceServers: [
+        { urls: "stun:stun.l.google.com:19302" }, // Free STUN server
+        {
+            urls: "turn:openrelay.metered.ca:80", // Free TURN server (limited usage)
+            username: "openrelayproject",
+            credential: "openrelayproject"
+        }
+    ]
+});
 
         peer.onicecandidate = (event) => {
             if (event.candidate) {
