@@ -21,11 +21,9 @@ const [downloadComplete, setDownloadComplete] = useState(false);
         const peer = new RTCPeerConnection({
     iceServers: [
         { urls: "stun:stun.l.google.com:19302" }, // Free STUN server
-        {
-            urls: "turn:openrelay.metered.ca:80", // Free TURN server (limited usage)
-            username: "openrelayproject",
-            credential: "openrelayproject"
-        }
+        urls: "turn:relay1.expressturn.com:3478",
+    username: "efwejrf23r",
+    credential: "d2hdsf98sdf"
     ]
 });
 
