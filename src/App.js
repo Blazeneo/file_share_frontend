@@ -22,9 +22,9 @@ const [downloadComplete, setDownloadComplete] = useState(false);
             iceServers: [
                 { urls: "stun:stun.l.google.com:19302" }, // Free STUN server
                 {
-                    urls: "turn:your-turn-server.com:3478",
-                    username: "your-username",
-                    credential: "your-password"
+                    urls: "relay1.expressturn.com:3478",
+                    username: "ef5DTVKLHB98TP7VT7",
+                    credential: "B535vB6Wr0eeZdZV"
                 }
             ]
         });
