@@ -18,86 +18,82 @@ const [downloadComplete, setDownloadComplete] = useState(false);
 
     // Create Peer Connection
     const createPeerConnection = () => {
-        const peer = new RTCPeerConnection({
-    iceServers: [
-        { urls: "stun:stun.l.google.com:19302" }, // Free STUN server
-        urls: "turn:relay1.expressturn.com:3478",
-    username: "efwejrf23r",
-    credential: "d2hdsf98sdf"
-    ]
-});
-
-        peer.onicecandidate = (event) => {
+        peerRef.current = new RTCPeerConnection({
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" }, // Free STUN server
+                {
+                    urls: "turn:your-turn-server.com:3478",
+                    username: "your-username",
+                    credential: "your-password"
+                }
+            ]
+        });
+    
+        // Handle ICE candidates
+        peerRef.current.onicecandidate = (event) => {
             if (event.candidate) {
                 socket.emit("candidate", event.candidate);
             }
         };
-// onmessage
-        peer.ondatachannel = (event) => {
-          setRole("Receiver");
-          dataChannelRef.current = event.channel;
-      
-          const receivedChunks = [];
-          let receivedBytes = 0;
-          let expectedFileSize = 0;
-          let receivedFileName = "received-file"; // Default filename
-      
-          event.channel.onmessage = (event) => {
-              if (typeof event.data === "string") {
-                  if (event.data.startsWith("FILENAME:")) {
-                      receivedFileName = event.data.split(":")[1]; // Extract filename
-                      return;
-                  }
-                  if (event.data.startsWith("SIZE:")) {
-                      expectedFileSize = parseInt(event.data.split(":")[1]);
-                      setFileSize(expectedFileSize);
-                      return;
-                  }
-                  if (event.data.startsWith("EOF")) {
-                      console.log("✅ End of file detected, assembling file...");
-                      
-                      const fileBlob = new Blob(receivedChunks);
-                      const url = URL.createObjectURL(fileBlob);
-                      
-                      setStatus("✅ File received!");
-                      setDownloadComplete(true);
-      
-                      const link = document.createElement("a");
-                      link.href = url;
-                      link.download = receivedFileName; // Use extracted filename
-                      document.body.appendChild(link);
-                      link.click();
-      
-                      receivedChunks.length = 0; // Clear memory
-                      return;
-                  }
-              }
-      
-              receivedChunks.push(event.data);
-              receivedBytes += event.data.byteLength;
-      
-              // Update UI progress
-              setTransferred(receivedBytes);
-              setProgress(Math.min((receivedBytes / expectedFileSize) * 100, 100));
-      
-              console.log(`📥 Received chunk (${event.data.byteLength} bytes), total: ${receivedBytes} bytes`);
-          };
-      
-          event.channel.onclose = () => {
-              console.log("❌ Data channel closed.");
-              setStatus("Connection closed.");
-          };
-      };
-      
-      
-      
-      
-      
-      
-      
-
-        peerRef.current = peer;
+    
+        // Handle DataChannel when receiving a connection
+        peerRef.current.ondatachannel = (event) => {
+            setRole("Receiver");
+            dataChannelRef.current = event.channel;
+    
+            const receivedChunks = [];
+            let receivedBytes = 0;
+            let expectedFileSize = 0;
+            let receivedFileName = "received-file"; // Default filename
+    
+            event.channel.onmessage = (event) => {
+                if (typeof event.data === "string") {
+                    if (event.data.startsWith("FILENAME:")) {
+                        receivedFileName = event.data.split(":")[1]; // Extract filename
+                        return;
+                    }
+                    if (event.data.startsWith("SIZE:")) {
+                        expectedFileSize = parseInt(event.data.split(":")[1]);
+                        setFileSize(expectedFileSize);
+                        return;
+                    }
+                    if (event.data.startsWith("EOF")) {
+                        console.log("✅ End of file detected, assembling file...");
+                        
+                        const fileBlob = new Blob(receivedChunks);
+                        const url = URL.createObjectURL(fileBlob);
+                        
+                        setStatus("✅ File received!");
+                        setDownloadComplete(true);
+    
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = receivedFileName; // Use extracted filename
+                        document.body.appendChild(link);
+                        link.click();
+    
+                        receivedChunks.length = 0; // Clear memory
+                        return;
+                    }
+                }
+    
+                receivedChunks.push(event.data);
+                receivedBytes += event.data.byteLength;
+    
+                // Update UI progress
+                setTransferred(receivedBytes);
+                setProgress(Math.min((receivedBytes / expectedFileSize) * 100, 100));
+    
+                console.log(`📥 Received chunk (${event.data.byteLength} bytes), total: ${receivedBytes} bytes`);
+            };
+    
+            event.channel.onclose = () => {
+                console.log("❌ Data channel closed.");
+                setStatus("Connection closed.");
+            };
+        };
     };
+    
 
     // Start Connection (Sender)
     const startConnection = async () => {
