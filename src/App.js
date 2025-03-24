@@ -20,12 +20,8 @@ const [downloadComplete, setDownloadComplete] = useState(false);
    const createPeerConnection = () => {
     peerRef.current = new RTCPeerConnection({
         iceServers: [
-            { urls: "stun:stun.l.google.com:19302" }, // Free STUN server
-            {
-                urls: "turn:your-turn-server.com:3478",
-                username: "your-username",
-                credential: "your-password"
-            }
+            { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" }
         ]
     });
 
